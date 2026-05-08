@@ -1,0 +1,2296 @@
+<!DOCTYPE html>
+<html lang="kk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Баспа | 6-сынып Информатика</title>
+
+    <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+
+    <style>
+        :root {
+            --bg: #0f0f0f;
+            --card-bg: rgba(30, 30, 50, 0.52);
+            --accent: #ff5c8d;
+            --accent2: #4ac3ff;
+            --text: #e0e0e0;
+            --border: rgba(255, 255, 255, 0.1);
+            --dark: rgba(20, 20, 30, 0.94);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: "Segoe UI", system-ui, sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 92, 141, 0.18), transparent 32%),
+                radial-gradient(circle at top right, rgba(74, 195, 255, 0.16), transparent 35%),
+                var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .auth-page {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background:
+                radial-gradient(circle at top left, rgba(255, 92, 141, 0.25), transparent 35%),
+                radial-gradient(circle at top right, rgba(74, 195, 255, 0.22), transparent 35%),
+                #0f0f0f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 430px;
+            background: rgba(30, 30, 50, 0.75);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 2.5rem;
+            text-align: center;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(18px);
+        }
+
+        .auth-card h1 {
+            font-size: 2.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .auth-card h2 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-card input {
+            width: 100%;
+            padding: 1rem 1.2rem;
+            margin: 0.6rem 0;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            outline: none;
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            font-size: 1rem;
+        }
+
+        .auth-card input::placeholder {
+            color: #aaa;
+        }
+
+        .auth-switch {
+            margin-top: 1rem;
+            color: #ccc;
+        }
+
+        .auth-switch span {
+            color: var(--accent2);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .auth-switch span:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        #authMessage {
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--dark);
+            backdrop-filter: blur(14px);
+            padding: 1rem 3rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.35rem;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin: 0 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover,
+        .navbar a.active {
+            color: var(--accent);
+        }
+
+        .current-user {
+            color: var(--accent2);
+            font-weight: 700;
+            margin-left: 0.8rem;
+        }
+
+        .logout-btn {
+            padding: 0.55rem 1rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            color: white;
+            font-weight: 700;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            transition: 0.3s;
+            margin-left: 0.5rem;
+        }
+
+        .logout-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .progress-panel {
+            max-width: 1200px;
+            margin: 1.5rem auto 0;
+            padding: 1.2rem 2rem;
+            background: rgba(30, 30, 50, 0.55);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            backdrop-filter: blur(14px);
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.35);
+        }
+
+        .progress-title {
+            display: flex;
+            justify-content: space-between;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 0.8rem;
+        }
+
+        .progress-line {
+            width: 100%;
+            height: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 30px;
+            overflow: hidden;
+        }
+
+        #progressFill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            border-radius: 30px;
+            transition: 0.5s ease;
+        }
+
+        .progress-steps {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .progress-step {
+            padding: 0.9rem;
+            text-align: center;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #aaa;
+            font-weight: 700;
+            border: 1px solid var(--border);
+        }
+
+        .progress-step.done {
+            background: linear-gradient(90deg, rgba(255, 92, 141, 0.28), rgba(74, 195, 255, 0.25));
+            color: white;
+            border-color: rgba(74, 195, 255, 0.45);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 0 2rem;
+            display: none;
+            animation: fadeUp 0.5s ease;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-size: 3.2rem;
+            text-align: center;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 2.5rem;
+            line-height: 1.2;
+        }
+
+        h2 {
+            color: var(--accent);
+            margin: 1.3rem 0 1rem;
+            font-size: 1.8rem;
+        }
+
+        h3 {
+            color: var(--accent2);
+            margin: 1rem 0 0.6rem;
+        }
+
+        p {
+            font-size: 1.08rem;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        .intro-text {
+            font-size: 1.15rem;
+            text-align: justify;
+            margin-bottom: 1.3rem;
+        }
+
+        .section-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.55);
+            transition: all 0.35s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 60px rgba(255, 92, 141, 0.17);
+        }
+
+        .program-note {
+            margin-top: 1.5rem;
+            padding: 1.2rem 1.5rem;
+            border-radius: 16px;
+            background: linear-gradient(90deg, rgba(255, 92, 141, 0.22), rgba(74, 195, 255, 0.22));
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #ffffff;
+            font-weight: 800;
+            text-align: center;
+            font-size: 1.15rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 1rem 2.3rem;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: white;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: 0.35s;
+            margin: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(255, 92, 141, 0.36);
+        }
+
+        .model-area {
+            max-width: 900px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+
+        model-viewer {
+            width: 100%;
+            height: 500px;
+            border-radius: 20px;
+            background: #111;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.72);
+            border: 1px solid var(--border);
+        }
+
+        .model-status {
+            margin-top: 1rem;
+            color: var(--accent2);
+            font-weight: 600;
+        }
+
+        ul.fancy-list,
+        ol.fancy-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        ul.fancy-list li,
+        ol.fancy-list li {
+            background: rgba(50, 50, 80, 0.36);
+            margin: 1rem 0;
+            padding: 1.1rem 1.5rem;
+            border-radius: 14px;
+            border-left: 5px solid var(--accent);
+            transition: 0.3s;
+        }
+
+        ul.fancy-list li:hover,
+        ol.fancy-list li:hover {
+            background: rgba(80, 50, 100, 0.48);
+            transform: translateX(8px);
+        }
+
+        .topic-list {
+            display: grid;
+            gap: 1.2rem;
+            margin-top: 2rem;
+        }
+
+        .topic-card {
+            background: rgba(50, 50, 80, 0.44);
+            border: 1px solid var(--border);
+            border-left: 6px solid var(--accent);
+            border-radius: 18px;
+            padding: 1.5rem 1.8rem;
+            cursor: pointer;
+            transition: 0.35s;
+        }
+
+        .topic-card:hover {
+            transform: translateX(10px);
+            background: rgba(80, 50, 100, 0.52);
+        }
+
+        .topic-card h3 {
+            color: white;
+            margin: 0;
+            font-size: 1.25rem;
+        }
+
+        .theory-block {
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.5rem;
+            margin: 1.3rem 0;
+        }
+
+        .info-note {
+            background: linear-gradient(90deg, rgba(255, 92, 141, 0.17), rgba(74, 195, 255, 0.15));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 18px;
+            padding: 1.3rem;
+            margin: 1.2rem 0;
+            font-weight: 700;
+        }
+
+        .news-grid,
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.4rem;
+            margin-top: 1.5rem;
+        }
+
+        .news-card {
+            background: rgba(50, 50, 80, 0.36);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 1.4rem;
+            transition: 0.3s;
+            overflow: hidden;
+        }
+
+        .news-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 15px 35px rgba(74, 195, 255, 0.12);
+        }
+
+        .news-number {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .news-link {
+            display: inline-block;
+            margin-top: 0.8rem;
+            color: var(--accent2);
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .news-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .gallery-img-card {
+            height: 260px;
+            border-radius: 22px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            position: relative;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.45);
+            transition: 0.35s;
+            background: #111;
+        }
+
+        .gallery-img-card:hover {
+            transform: scale(1.03);
+        }
+
+        .gallery-img-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .art-title {
+            position: absolute;
+            left: 1rem;
+            bottom: 1rem;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(8px);
+            padding: 0.6rem 1rem;
+            border-radius: 30px;
+            font-weight: 700;
+            color: white;
+        }
+
+        .test-question {
+            margin-bottom: 1.4rem;
+            background: rgba(255, 255, 255, 0.045);
+            border-radius: 16px;
+            padding: 1.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .test-question label {
+            display: block;
+            margin: 0.7rem 0;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .test-question label:hover {
+            background: rgba(255, 92, 141, 0.13);
+        }
+
+        .test-question select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            margin-top: 0.6rem;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .test-question select option {
+            color: #111;
+        }
+
+        .match-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            align-items: center;
+            margin: 0.9rem 0;
+        }
+
+        .match-row span {
+            padding: 0.8rem 1rem;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .multi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 0.7rem;
+            margin-top: 1rem;
+        }
+
+        .sortable-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 1rem;
+        }
+
+        .sortable-item {
+            background: rgba(50, 50, 80, 0.55);
+            margin: 0.8rem 0;
+            padding: 1rem 1.2rem;
+            border-radius: 14px;
+            border-left: 5px solid var(--accent2);
+            cursor: grab;
+            user-select: none;
+            transition: 0.25s;
+        }
+
+        .sortable-item:hover {
+            background: rgba(80, 50, 100, 0.58);
+            transform: scale(1.01);
+        }
+
+        .sortable-item.dragging {
+            opacity: 0.45;
+            border-left-color: var(--accent);
+        }
+
+        #result {
+            display: none;
+            margin-top: 1.4rem;
+            padding: 1.2rem;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .sketchup-frame-box,
+        .learning-frame-box,
+        .wordwall-frame-box,
+        .youtube-frame-box {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            background: #111;
+            box-shadow: 0 15px 45px rgba(0, 0, 0, 0.5);
+            margin: 1.5rem 0;
+        }
+
+        .sketchup-frame-box {
+            height: 720px;
+        }
+
+        .learning-frame-box {
+            height: 520px;
+        }
+
+        .wordwall-frame-box {
+            height: 430px;
+        }
+
+        .youtube-frame-box {
+            height: 500px;
+        }
+
+        .sketchup-frame,
+        .learning-frame,
+        .wordwall-frame,
+        .youtube-frame-box iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: white;
+        }
+
+        .youtube-video-card {
+            margin: 2rem 0;
+            padding: 1.2rem;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.045);
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.35);
+        }
+
+        .youtube-video-card h3 {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .sketchup-warning,
+        .video-note {
+            padding: 1rem 1.3rem;
+            background: rgba(255, 193, 7, 0.12);
+            border: 1px solid rgba(255, 193, 7, 0.25);
+            border-radius: 16px;
+            color: #ffd166;
+            margin-top: 1rem;
+            font-weight: 600;
+        }
+
+        .author-box {
+            display: grid;
+            grid-template-columns: 220px 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .author-photo {
+            width: 220px;
+            height: 220px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid var(--accent);
+            box-shadow: 0 15px 40px rgba(255, 92, 141, 0.25);
+            background: #111;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: #888;
+            border-top: 1px solid var(--border);
+            margin-top: 4rem;
+        }
+
+        @media (max-width: 850px) {
+            .navbar {
+                padding: 1rem 1.2rem;
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                justify-content: center;
+            }
+
+            .navbar a {
+                display: inline-block;
+                margin: 0.4rem 0.55rem;
+            }
+
+            .current-user {
+                display: block;
+                width: 100%;
+                text-align: center;
+                margin: 0.5rem 0;
+            }
+
+            .progress-panel {
+                margin: 1rem;
+                padding: 1rem;
+            }
+
+            .progress-steps {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2.35rem;
+            }
+
+            .container {
+                margin: 2.5rem auto;
+                padding: 0 1rem;
+            }
+
+            .section-card {
+                padding: 1.5rem;
+            }
+
+            model-viewer {
+                height: 350px;
+            }
+
+            .match-row {
+                grid-template-columns: 1fr;
+            }
+
+            .sketchup-frame-box {
+                height: 560px;
+            }
+
+            .learning-frame-box {
+                height: 500px;
+            }
+
+            .youtube-frame-box {
+                height: 300px;
+            }
+
+            .author-box {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .author-photo {
+                margin: 0 auto;
+            }
+        }
+    
+
+        /* ===== AI Assistant (backend арқылы қауіпсіз жұмыс істейді) ===== */
+        .ai-assistant-button {
+            position: fixed;
+            right: 25px;
+            bottom: 25px;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            z-index: 999;
+            box-shadow: 0 15px 40px rgba(255, 92, 141, 0.35);
+            transition: 0.3s;
+        }
+
+        .ai-assistant-button:hover { transform: scale(1.08); }
+
+        .ai-chat-box {
+            position: fixed;
+            right: 25px;
+            bottom: 110px;
+            width: 390px;
+            max-width: calc(100% - 40px);
+            height: 540px;
+            background: rgba(20, 20, 35, 0.96);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(18px);
+        }
+
+        .ai-chat-header {
+            padding: 1rem;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: white;
+            font-weight: 800;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .ai-chat-header button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            cursor: pointer;
+        }
+
+        .ai-chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+        }
+
+        .ai-message {
+            margin-bottom: 0.9rem;
+            padding: 0.8rem 1rem;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .ai-user {
+            background: rgba(74, 195, 255, 0.18);
+            border: 1px solid rgba(74, 195, 255, 0.25);
+            margin-left: 2rem;
+        }
+
+        .ai-bot {
+            background: rgba(255, 92, 141, 0.16);
+            border: 1px solid rgba(255, 92, 141, 0.25);
+            margin-right: 2rem;
+        }
+
+        .ai-chat-input {
+            display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .ai-chat-input input {
+            flex: 1;
+            padding: 0.9rem 1rem;
+            border-radius: 15px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            outline: none;
+        }
+
+        .ai-chat-input button {
+            padding: 0.9rem 1.1rem;
+            border-radius: 15px;
+            border: none;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .ai-quick-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+            padding: 0 1rem 1rem;
+        }
+
+        .ai-quick-buttons button {
+            padding: 0.45rem 0.75rem;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.08);
+            color: white;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .ai-quick-buttons button:hover { background: rgba(74, 195, 255, 0.18); }
+
+        @media (max-width: 600px) {
+            .ai-chat-box {
+                right: 15px;
+                bottom: 95px;
+                height: 480px;
+            }
+            .ai-assistant-button {
+                right: 18px;
+                bottom: 18px;
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <div id="authPage" class="auth-page">
+        <div class="auth-card">
+            <h1>3D Баспа</h1>
+            <h2>Электрондық оқулыққа кіру</h2>
+
+            <div id="loginBox">
+                <input type="text" id="loginUsername" placeholder="Логин">
+                <input type="password" id="loginPassword" placeholder="Құпиясөз">
+
+                <button class="btn" onclick="loginUser()">Кіру</button>
+
+                <p class="auth-switch">
+                    Аккаунтың жоқ па?
+                    <span onclick="showRegister()">Тіркелу</span>
+                </p>
+            </div>
+
+            <div id="registerBox" style="display:none;">
+                <input type="text" id="registerUsername" placeholder="Жаңа логин">
+                <input type="password" id="registerPassword" placeholder="Жаңа құпиясөз">
+                <input type="password" id="registerPassword2" placeholder="Құпиясөзді қайтала">
+
+                <button class="btn" onclick="registerUser()">Тіркелу</button>
+
+                <p class="auth-switch">
+                    Аккаунтың бар ма?
+                    <span onclick="showLogin()">Кіру</span>
+                </p>
+            </div>
+
+            <p id="authMessage"></p>
+        </div>
+    </div>
+
+    <div class="navbar">
+        <div class="logo">
+            <a onclick="showPage('home')">3D Oqulyq</a>
+        </div>
+
+        <div class="nav-links">
+            <a onclick="showPage('home')" class="active">Бастапқы бет</a>
+            <a onclick="showPage('intro')">Кіріспе</a>
+            <a onclick="showPage('theory')">Теория</a>
+            <a onclick="showPage('test')">Тест</a>
+            <a onclick="showPage('practice')">Практика</a>
+            <a onclick="showPage('author')">Автор</a>
+
+            <span id="currentUserName" class="current-user"></span>
+            <button class="logout-btn" onclick="logoutUser()">Шығу</button>
+        </div>
+    </div>
+
+    <div id="progressPanel" class="progress-panel">
+        <div class="progress-title">
+            <span>Оқу прогресі</span>
+            <span id="progressPercent">0%</span>
+        </div>
+
+        <div class="progress-line">
+            <div id="progressFill"></div>
+        </div>
+
+        <div class="progress-steps">
+            <div id="stepTheory" class="progress-step">1-кезең: Теория өту</div>
+            <div id="stepTest" class="progress-step">2-кезең: Тест тапсыру</div>
+        </div>
+    </div>
+
+    <div id="home" class="container active">
+        <h1>3D Баспа<br>6-сынып Информатика</h1>
+
+        <div class="model-area">
+            <model-viewer
+                id="viewer"
+                src="https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Assets/main/Models/ToyCar/glTF-Binary/ToyCar.glb"
+                alt="3D модель"
+                auto-rotate
+                rotation-per-second="40deg"
+                camera-controls
+                ar
+                shadow-intensity="1.2"
+                exposure="1"
+                environment-image="neutral"
+                camera-orbit="0deg 75deg auto"
+                camera-target="auto auto auto"
+                field-of-view="30deg">
+            </model-viewer>
+
+            <div style="margin-top:2rem;">
+                <label class="btn" style="cursor:pointer;">
+                    3D модель енгізу
+                    <input type="file" id="modelInput" accept=".glb" hidden>
+                </label>
+                <div id="modelStatus" class="model-status"></div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>3D баспа әлемінде болып жатқан жаңалықтар</h2>
+
+            <div class="news-grid">
+                <div class="news-card">
+                    <div class="news-number">1</div>
+                    <h3>3D баспа өндірісте кең қолданылуда</h3>
+                    <p>3D баспа прототип жасаудан нақты өндірістік бұйымдар шығаруға дейін дамып келеді.</p>
+                    <a class="news-link" href="https://3dprintingindustry.com/news/the-future-of-3d-printing-additive-manufacturing-expert-forecasts-for-2026-249050/" target="_blank">Сілтемені ашу →</a>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-number">2</div>
+                    <h3>Жаңа 3D принтерлер жылдамдады</h3>
+                    <p>Қазіргі принтерлер модельді бұрынғыға қарағанда тезірек әрі сапалы басып шығара алады.</p>
+                    <a class="news-link" href="https://www.hp.com/us-en/newsroom/press-releases/2026/hp-introduces-mjf-1200-3d-printer.html" target="_blank">Сілтемені ашу →</a>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-number">3</div>
+                    <h3>3D баспа нарығы өсіп келеді</h3>
+                    <p>Additive manufacturing саласы білім, өндіріс, медицина және инженерияда кеңінен таралуда.</p>
+                    <a class="news-link" href="https://www.astm.org/news/press-releases/wohlers-report-2026" target="_blank">Сілтемені ашу →</a>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-number">4</div>
+                    <h3>Көптүсті 3D баспа дамуда</h3>
+                    <p>Көптүсті және көпматериалды баспа күрделі әрі көрнекі модельдер жасауға мүмкіндік береді.</p>
+                    <a class="news-link" href="https://www.3dnatives.com/en/3d-printing-innovations-ces-2026-14012026/" target="_blank">Сілтемені ашу →</a>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-number">5</div>
+                    <h3>3D баспа медицинада қолданылуда</h3>
+                    <p>3D баспа медицинада протез, үлгі және арнайы бөлшектер жасауға көмектеседі.</p>
+                    <a class="news-link" href="https://news.mit.edu/2026/3d-printing-platform-rapidly-produces-complex-electric-machines-0218" target="_blank">Сілтемені ашу →</a>
+                </div>
+
+                <div class="news-card">
+                    <div class="news-number">6</div>
+                    <h3>3D баспа автоматтандырылуда</h3>
+                    <p>Қазіргі 3D принтерлерде автоматты баптау және бақылау функциялары дамып жатыр.</p>
+                    <a class="news-link" href="https://www.3dsystems.com/blog/2026/2026-04/how-3d-systems-advancing-high-throughput-additive-manufacturing-rapid-tct-2026" target="_blank">Сілтемені ашу →</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>3D бойынша әдемі суреттер</h2>
+
+            <div class="gallery-grid">
+                <div class="gallery-img-card">
+                    <img src="https://img.freepik.com/premium-photo/person-reviewing-3dprinted-prototype-providing-feedback-computer-screen-displaying-product-details_964444-45949.jpg?semt=ais_hybrid&w=740&q=80" alt="3D prototype review">
+                    <div class="art-title">3D прототип</div>
+                </div>
+
+                <div class="gallery-img-card">
+                    <img src="https://avatars.mds.yandex.net/i?id=f3e2f595bafbaa5297a78e4746f97cfb_l-6229182-images-thumbs&n=13" alt="3D model">
+                    <div class="art-title">3D модель</div>
+                </div>
+
+                <div class="gallery-img-card">
+                    <img src="https://cdnb.artstation.com/p/marketplace/presentation_assets/002/233/373/medium/file.jpg?1670418884" alt="3D object">
+                    <div class="art-title">3D объект</div>
+                </div>
+
+                <div class="gallery-img-card">
+                    <img src="https://img.freepik.com/free-psd/3d-illustration-isometric-room_23-2150102464.jpg" alt="3D room">
+                    <div class="art-title">3D бөлме</div>
+                </div>
+
+                <div class="gallery-img-card">
+                    <img src="https://img.freepik.com/premium-photo/abstract-3d-printer-ai-generated_88211-10875.jpg?semt=ais_hybrid" alt="3D printer abstract">
+                    <div class="art-title">3D принтер</div>
+                </div>
+
+                <div class="gallery-img-card">
+                    <img src="https://habrastorage.org/r/w1560/getpro/habr/upload_files/15d/09d/446/15d09d446f0db27cf9ff813b1bb0018d.png" alt="3D printing">
+                    <div class="art-title">3D баспа</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="intro" class="container">
+        <h1>Кіріспе</h1>
+
+        <div class="section-card">
+            <h2>Құрметті оқушы!</h2>
+
+            <p class="intro-text">
+                Сен қазіргі заманның ең қызықты әрі қарқынды дамып жатқан технологияларының бірі —
+                <strong>3D баспа</strong> әлеміне қадам басқалы тұрсың. Бұл технология компьютерде
+                жасалған үшөлшемді модельді нақты затқа айналдыруға мүмкіндік береді.
+            </p>
+
+            <p class="intro-text">
+                Бұрын бұйым жасау үшін арнайы зауыт, күрделі құрал-жабдық және көп уақыт қажет болатын.
+                Ал бүгінгі күні 3D модельді компьютерде жобалап, оны 3D принтер арқылы қабат-қабат
+                басып шығару мүмкіндігі бар.
+            </p>
+
+            <p class="intro-text">
+                Бұл электрондық оқулықта сен 3D модельдеу ұғымымен, 3D редакторлардың қызметімен,
+                SketchUp бағдарламасының негізгі құралдарымен және үшөлшемді объектілерді құру
+                тәсілдерімен танысасың.
+            </p>
+
+            <p class="program-note">
+                Қазақстанның 2025–2026 оқу жылындағы бағдарламасы сай дайындалды.
+            </p>
+        </div>
+
+        <div class="section-card">
+            <h2>Бұл оқулықта сен:</h2>
+
+            <ul class="fancy-list">
+                <li>3D баспа және 3D модельдеу ұғымдарын түсінесің;</li>
+                <li>3D модельдің 2D суреттен айырмашылығын білесің;</li>
+                <li>SketchUp бағдарламасының негізгі құралдарымен танысасың;</li>
+                <li>Конус, цилиндр, сфера сияқты үшөлшемді модельдер туралы білесің;</li>
+                <li>Қарапайым 3D объектілерді құру жолдарын үйренесің;</li>
+                <li>3D модельді баспаға дайындау кезеңдерін меңгересің.</li>
+            </ul>
+        </div>
+
+        <div style="text-align:center;">
+            <button class="btn" onclick="showPage('theory')">Теорияға өту</button>
+        </div>
+    </div>
+
+    <div id="theory" class="container">
+        <h1>Теория</h1>
+
+        <div class="section-card">
+            <h2>Негізгі тақырыптар</h2>
+
+            <div class="topic-list">
+                <div class="topic-card" onclick="showPage('theory21')">
+                    <h3>2.1. 3D -редакторы</h3>
+                </div>
+
+                <div class="topic-card" onclick="showPage('theory22')">
+                    <h3>2.2. 3D -редакторы құралдары</h3>
+                </div>
+
+                <div class="topic-card" onclick="showPage('theory23')">
+                    <h3>2.3. 3D редактордағы объектілердің модельдерін құру</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="theory21" class="container">
+        <h1>2.1. 3D -редакторы</h1>
+
+        <div class="section-card">
+            <div class="info-note">
+                Бұл тақырыпта 3D редактордың не екенін, 3D модельдеудің ерекшелігін және 6-сыныпта қолданылатын SketchUp бағдарламасының қызметін үйренесің.
+            </div>
+
+            <div class="theory-block">
+                <h3>3D модельдеу дегеніміз не?</h3>
+                <p class="intro-text">
+                    3D модельдеу — компьютерлік графикадағы көлемді объектілерді құру тәсілі.
+                    2D суретте тек ені мен биіктігі болса, 3D модельде ені, биіктігі және тереңдігі болады.
+                </p>
+            </div>
+
+            <div class="theory-block">
+                <h3>3D редактор дегеніміз не?</h3>
+                <p class="intro-text">
+                    3D редактор — үшөлшемді объектілерді жасауға, өзгертуге және кеңістікте орналастыруға арналған бағдарлама.
+                    Мұндай бағдарламаларда объектілерді сызуға, жылжытуға, бұруға, созуға, бояуға және біріктіруге болады.
+                </p>
+            </div>
+
+            <div class="theory-block">
+                <h3>6-сыныпта қолданылатын бағдарлама</h3>
+                <p class="intro-text">
+                    6-сыныптағы 3D модельдеу тақырыбы SketchUp бағдарламасы арқылы жүргізіледі.
+                    SketchUp оқушыға үшөлшемді модельді қарапайым құралдар арқылы жасауға мүмкіндік береді.
+                </p>
+            </div>
+
+            <button class="btn" onclick="showPage('theory')">← Теорияға қайту</button>
+            <button class="btn" onclick="showPage('theory22')">Келесі тақырып →</button>
+        </div>
+    </div>
+
+    <div id="theory22" class="container">
+        <h1>2.2. 3D -редакторы құралдары</h1>
+
+        <div class="section-card">
+            <div class="info-note">
+                Бұл тақырыпта SketchUp бағдарламасы туралы толық ақпарат және оның негізгі құралдары қарастырылады.
+            </div>
+
+            <div class="theory-block">
+                <h3>SketchUp дегеніміз не?</h3>
+                <p class="intro-text">
+                    SketchUp — үшөлшемді модельдер құруға арналған 3D редактор. Бұл бағдарлама қарапайым интерфейсімен
+                    ерекшеленеді және оқушыларға 3D модельдеуді оңай меңгеруге мүмкіндік береді.
+                </p>
+            </div>
+
+            <div class="theory-block">
+                <h3>SketchUp бағдарламасының шығу тарихы</h3>
+                <p class="intro-text">
+                    SketchUp бағдарламасын алғашында <strong>@Last Software</strong> компаниясы жасап шығарды.
+                    Бағдарлама 1999 жылы жасалып, 2000 жылдың тамыз айында 1-нұсқасы жарық көрді.
+                </p>
+                <p class="intro-text">
+                    2006 жылы Google компаниясы SketchUp бағдарламасын сатып алды.
+                    Кейін бағдарлама сәулет, дизайн және білім беру салаларында кеңінен қолданыла бастады.
+                </p>
+            </div>
+
+            <div class="theory-block">
+                <h3>SketchUp бағдарламасының негізгі құралдары</h3>
+                <ul class="fancy-list">
+                    <li><strong>Таңдау құралы</strong> — объектіні белгілеу үшін қолданылады.</li>
+                    <li><strong>Өшіргіш</strong> — қажет емес сызықтар мен бөліктерді өшіреді.</li>
+                    <li><strong>Бояу құралы</strong> — объектінің бетіне түс немесе материал береді.</li>
+                    <li><strong>Сызық</strong> — түзу сызықтар салу үшін қолданылады.</li>
+                    <li><strong>Тіктөртбұрыш</strong> — жазықтықта төртбұрыш салуға арналған.</li>
+                    <li><strong>Шеңбер</strong> — цилиндр сияқты пішіндердің негізін салуға мүмкіндік береді.</li>
+                    <li><strong>Тарту/Итеру</strong> — жазық фигураны көлемді 3D объектіге айналдырады.</li>
+                    <li><strong>Жылжыту</strong> — объектіні бір орыннан екінші орынға ауыстырады.</li>
+                    <li><strong>Айналдыру</strong> — объектіні белгілі бір бұрышқа бұрады.</li>
+                    <li><strong>Масштабтау</strong> — объектінің өлшемін өзгертеді.</li>
+                </ul>
+            </div>
+
+            <button class="btn" onclick="showPage('theory')">← Теорияға қайту</button>
+            <button class="btn" onclick="showPage('theory21')">← Алдыңғы тақырып</button>
+            <button class="btn" onclick="showPage('theory23')">Келесі тақырып →</button>
+        </div>
+    </div>
+
+    <div id="theory23" class="container">
+        <h1>2.3. 3D редактордағы объектілердің модельдерін құру</h1>
+
+        <div class="section-card">
+            <div class="info-note">
+                Бұл тақырыпта SketchUp бағдарламасында 3D объектілердің модельдерін құру жолдары қарастырылады.
+            </div>
+
+            <div class="theory-block">
+                <h3>Объект моделін құру дегеніміз не?</h3>
+                <p class="intro-text">
+                    3D редакторда объект моделін құру — белгілі бір заттың компьютердегі көлемді нұсқасын жасау.
+                    Модельді құру кезінде қарапайым пішіндер, сызықтар, беттер және көлемді денелер қолданылады.
+                </p>
+            </div>
+
+            <div class="theory-block">
+                <h3>3D объектіні құру кезеңдері</h3>
+                <ol class="fancy-list">
+                    <li>Жұмыс алаңын ашу және модель салатын орынды таңдау;</li>
+                    <li>Сызу құралдары арқылы бастапқы пішінді салу;</li>
+                    <li>Тарту/Итеру құралы арқылы пішінге көлем беру;</li>
+                    <li>Объектіні жылжыту, бұру немесе масштабтау;</li>
+                    <li>Объектіге түс немесе материал беру;</li>
+                    <li>Дайын модельді сақтау.</li>
+                </ol>
+            </div>
+
+            <div class="theory-block">
+                <h3>Конус, цилиндр және сфера жасау</h3>
+                <p class="intro-text">
+                    SketchUp-та цилиндр жасау үшін алдымен шеңбер салынады.
+                    Кейін ол Push/Pull құралы арқылы жоғары қарай созылады.
+                    Конус жасау үшін шеңбер негіз ретінде алынып, оның үстіңгі бөлігі кішірейтіледі.
+                </p>
+            </div>
+
+            <button class="btn" onclick="showPage('theory')">← Теорияға қайту</button>
+            <button class="btn" onclick="showPage('theory22')">← Алдыңғы тақырып</button>
+            <button class="btn" onclick="showPage('test')">Тестке өту →</button>
+        </div>
+    </div>
+
+    <div id="test" class="container">
+        <h1>Тест</h1>
+
+        <div class="section-card">
+            <h2>3D баспа және SketchUp бойынша қорытынды тест</h2>
+            <p class="intro-text">
+                Барлығы: <strong>15 тапсырма</strong>. Әр тапсырма — <strong>1 балл</strong>.
+                Тест кезеңі орындалды деп есептелуі үшін кемінде <strong>10 балл</strong> жинау керек.
+            </p>
+
+            <form id="testForm">
+                <div class="test-question">
+                    <p><strong>1.</strong> 3D модель дегеніміз не?</p>
+                    <label><input type="radio" name="q1" value="a"> Тек қағазға салынған жазық сурет</label>
+                    <label><input type="radio" name="q1" value="b"> Ұзындығы, ені және биіктігі бар көлемді объектінің компьютерлік үлгісі</label>
+                    <label><input type="radio" name="q1" value="c"> Тек дыбыстық файл</label>
+                    <label><input type="radio" name="q1" value="d"> Мәтін теруге арналған құжат</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>2.</strong> 6-сыныпта 3D модельдеу қандай бағдарлама арқылы қарастырылады?</p>
+                    <label><input type="radio" name="q2" value="a"> Microsoft Word</label>
+                    <label><input type="radio" name="q2" value="b"> Paint</label>
+                    <label><input type="radio" name="q2" value="c"> SketchUp</label>
+                    <label><input type="radio" name="q2" value="d"> Excel</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>3.</strong> Жазық фигураны көлемді объектіге айналдыратын құрал:</p>
+                    <label><input type="radio" name="q3" value="a"> Push/Pull</label>
+                    <label><input type="radio" name="q3" value="b"> Text</label>
+                    <label><input type="radio" name="q3" value="c"> Zoom</label>
+                    <label><input type="radio" name="q3" value="d"> Save</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>4.</strong> Түзу сызық салуға арналған құрал:</p>
+                    <label><input type="radio" name="q4" value="a"> Line</label>
+                    <label><input type="radio" name="q4" value="b"> Paint Bucket</label>
+                    <label><input type="radio" name="q4" value="c"> Eraser</label>
+                    <label><input type="radio" name="q4" value="d"> Orbit</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>5.</strong> Объектінің өлшемін үлкейту немесе кішірейту құралы:</p>
+                    <label><input type="radio" name="q5" value="a"> Scale</label>
+                    <label><input type="radio" name="q5" value="b"> Line</label>
+                    <label><input type="radio" name="q5" value="c"> Circle</label>
+                    <label><input type="radio" name="q5" value="d"> Rectangle</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>6.</strong> 3D модельде неше негізгі өлшем болады?</p>
+                    <label><input type="radio" name="q6" value="a"> 1</label>
+                    <label><input type="radio" name="q6" value="b"> 2</label>
+                    <label><input type="radio" name="q6" value="c"> 3</label>
+                    <label><input type="radio" name="q6" value="d"> 0</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>7.</strong> 3D баспаға дайындауда жиі қолданылатын файл форматы:</p>
+                    <label><input type="radio" name="q7" value="a"> STL</label>
+                    <label><input type="radio" name="q7" value="b"> DOCX</label>
+                    <label><input type="radio" name="q7" value="c"> MP3</label>
+                    <label><input type="radio" name="q7" value="d"> TXT</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>8.</strong> SketchUp-та цилиндр жасау үшін алдымен қандай пішін салынады?</p>
+                    <label><input type="radio" name="q8" value="a"> Үшбұрыш</label>
+                    <label><input type="radio" name="q8" value="b"> Шеңбер</label>
+                    <label><input type="radio" name="q8" value="c"> Мәтін</label>
+                    <label><input type="radio" name="q8" value="d"> Сурет</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>9.</strong> 3D принтердің негізгі қызметі қандай?</p>
+                    <label><input type="radio" name="q9" value="a"> Музыка ойнату</label>
+                    <label><input type="radio" name="q9" value="b"> Мәтін аудару</label>
+                    <label><input type="radio" name="q9" value="c"> Компьютердегі 3D модельді нақты зат ретінде басып шығару</label>
+                    <label><input type="radio" name="q9" value="d"> Интернетке қосылу</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>10.</strong> Объектіні бір орыннан екінші орынға ауыстыру құралы:</p>
+                    <label><input type="radio" name="q10" value="a"> Move</label>
+                    <label><input type="radio" name="q10" value="b"> Paint Bucket</label>
+                    <label><input type="radio" name="q10" value="c"> Eraser</label>
+                    <label><input type="radio" name="q10" value="d"> Circle</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>11. Дұрыс/Бұрыс:</strong> SketchUp бағдарламасында 2D пішінді 3D модельге айналдыруға болады.</p>
+                    <label><input type="radio" name="q11" value="true"> Дұрыс</label>
+                    <label><input type="radio" name="q11" value="false"> Бұрыс</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>12. Дұрыс/Бұрыс:</strong> 3D модельде тек ені мен биіктігі болады, тереңдігі болмайды.</p>
+                    <label><input type="radio" name="q12" value="true"> Дұрыс</label>
+                    <label><input type="radio" name="q12" value="false"> Бұрыс</label>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>13. Сәйкестендіру:</strong> Ұғымдарды дұрыс қызметімен сәйкестендір.</p>
+
+                    <div class="match-row">
+                        <span>SketchUp</span>
+                        <select id="m1">
+                            <option value="">Жауап таңда</option>
+                            <option value="editor">3D модель жасау бағдарламасы</option>
+                            <option value="volume">Жазық фигураға көлем беру құралы</option>
+                            <option value="format">3D баспаға арналған файл форматы</option>
+                            <option value="printer">Модельді нақты затқа айналдыратын құрылғы</option>
+                        </select>
+                    </div>
+
+                    <div class="match-row">
+                        <span>Push/Pull</span>
+                        <select id="m2">
+                            <option value="">Жауап таңда</option>
+                            <option value="editor">3D модель жасау бағдарламасы</option>
+                            <option value="volume">Жазық фигураға көлем беру құралы</option>
+                            <option value="format">3D баспаға арналған файл форматы</option>
+                            <option value="printer">Модельді нақты затқа айналдыратын құрылғы</option>
+                        </select>
+                    </div>
+
+                    <div class="match-row">
+                        <span>STL</span>
+                        <select id="m3">
+                            <option value="">Жауап таңда</option>
+                            <option value="editor">3D модель жасау бағдарламасы</option>
+                            <option value="volume">Жазық фигураға көлем беру құралы</option>
+                            <option value="format">3D баспаға арналған файл форматы</option>
+                            <option value="printer">Модельді нақты затқа айналдыратын құрылғы</option>
+                        </select>
+                    </div>
+
+                    <div class="match-row">
+                        <span>3D принтер</span>
+                        <select id="m4">
+                            <option value="">Жауап таңда</option>
+                            <option value="editor">3D модель жасау бағдарламасы</option>
+                            <option value="volume">Жазық фигураға көлем беру құралы</option>
+                            <option value="format">3D баспаға арналған файл форматы</option>
+                            <option value="printer">Модельді нақты затқа айналдыратын құрылғы</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>14. Көп жауапты тест:</strong> SketchUp бағдарламасына тән дұрыс сипаттамаларды таңда.</p>
+                    <div class="multi-grid">
+                        <label><input type="checkbox" name="multi14" value="a"> 3D модель жасауға арналған бағдарлама</label>
+                        <label><input type="checkbox" name="multi14" value="b"> Push/Pull құралы арқылы көлем беруге болады</label>
+                        <label><input type="checkbox" name="multi14" value="c"> Тек мәтін теруге арналған бағдарлама</label>
+                        <label><input type="checkbox" name="multi14" value="d"> Объектіні жылжытуға, бұруға, масштабтауға болады</label>
+                        <label><input type="checkbox" name="multi14" value="e"> Тек дыбыс өңдеу үшін қолданылады</label>
+                        <label><input type="checkbox" name="multi14" value="f"> 6-сыныпта 3D модельдеуді үйренуге қолайлы</label>
+                        <label><input type="checkbox" name="multi14" value="g"> 3D баспаға модель дайындауға көмектеседі</label>
+                        <label><input type="checkbox" name="multi14" value="h"> Интернет браузерінің ғана қызметін атқарады</label>
+                    </div>
+                </div>
+
+                <div class="test-question">
+                    <p><strong>15. Ретімен қою:</strong> SketchUp-та қарапайым 3D модель жасау кезеңдерін дұрыс ретке қой.</p>
+                    <ul id="sortableList" class="sortable-list">
+                        <li class="sortable-item" draggable="true" data-order="3">Push/Pull құралымен көлем беру</li>
+                        <li class="sortable-item" draggable="true" data-order="1">SketchUp бағдарламасын іске қосу</li>
+                        <li class="sortable-item" draggable="true" data-order="5">Жұмысты сақтау</li>
+                        <li class="sortable-item" draggable="true" data-order="2">Тіктөртбұрыш салу</li>
+                        <li class="sortable-item" draggable="true" data-order="4">Модельге түс немесе материал беру</li>
+                    </ul>
+                </div>
+
+                <button type="button" class="btn" onclick="checkTest()">Тестті тексеру</button>
+                <button type="button" class="btn" onclick="resetTest()">Қайта тапсыру</button>
+            </form>
+
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <div id="practice" class="container">
+        <h1>Практика</h1>
+
+        <div class="section-card">
+            <h2>Практикалық жұмыс №1</h2>
+            <p><strong>Тақырыбы:</strong> SketchUp бағдарламасында қарапайым 3D модель құру</p>
+
+            <h2>Мақсаты</h2>
+            <p class="intro-text">
+                SketchUp бағдарламасының негізгі құралдарын пайдаланып,
+                қарапайым үшөлшемді модель құруды үйрену.
+            </p>
+
+            <h2>SketchUp бағдарламасы</h2>
+            <p class="intro-text">
+                Төмендегі терезеде SketchUp онлайн бағдарламасы сайттың ішінде ашылады.
+                Егер терезе бос болып тұрса, “Жеке бетте ашу” батырмасын қолдан.
+            </p>
+
+            <div style="text-align:center; margin: 1.5rem 0;">
+                <button class="btn" onclick="loadSketchUpInside()">SketchUp-ты сайт ішінде ашу</button>
+                <a class="btn" href="https://app.sketchup.com/app" target="_blank">Жеке бетте ашу</a>
+            </div>
+
+            <div class="sketchup-frame-box">
+                <iframe
+                    id="sketchupFrame"
+                    class="sketchup-frame"
+                    src="https://app.sketchup.com/app"
+                    allowfullscreen
+                    allow="fullscreen; clipboard-read; clipboard-write">
+                </iframe>
+            </div>
+
+            <div class="sketchup-warning">
+                Ескерту: Кейбір сайттар қауіпсіздік үшін басқа сайттың ішінде ашылмайды.
+                Егер SketchUp көрінбесе, “Жеке бетте ашу” батырмасын бас.
+            </div>
+
+            <h2>Орындау қадамдары</h2>
+            <ol class="fancy-list">
+                <li>SketchUp бағдарламасын аш.</li>
+                <li>Жаңа жоба баста.</li>
+                <li>Тіктөртбұрыш құралын таңда.</li>
+                <li>Жұмыс алаңында тіктөртбұрыш сыз.</li>
+                <li>Push/Pull құралын қолданып, оны көлемді фигураға айналдыр.</li>
+                <li>Модельге түс немесе материал бер.</li>
+                <li>Жұмысты сақта.</li>
+            </ol>
+
+            <h2>SketchUP-қа нұсқаулық бейнежазбалар</h2>
+            <p class="intro-text">
+                Төмендегі 8 бейнежазба SketchUp бағдарламасында жұмыс істеуді, құралдарды қолдануды
+                және 3D модель құруды үйренуге көмектеседі.
+            </p>
+
+            <div class="video-note">
+                Егер видео сайт ішінде ашылмаса, сайтты GitHub Pages немесе Live Server арқылы ашып көр.
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>1-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/rIqrQle2rsY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/rIqrQle2rsY" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>2-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/2ySuHCVoNjY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/2ySuHCVoNjY" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>3-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/NWVFPofDbZo" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/NWVFPofDbZo" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>4-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/7NSS8sFUwRY" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/7NSS8sFUwRY" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>5-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/67z-t4_JEjw" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/67z-t4_JEjw" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>6-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/NqNtwQ1fnyg" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/NqNtwQ1fnyg" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>7-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/JK6JddV7ZMc" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/JK6JddV7ZMc" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+
+            <div class="youtube-video-card">
+                <h3>8-видео</h3>
+                <div class="youtube-frame-box">
+                    <iframe width="100%" height="500" src="https://www.youtube.com/embed/cAIVUIHZXAQ" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+                <div style="text-align:center;">
+                    <a class="btn" href="https://youtu.be/cAIVUIHZXAQ" target="_blank">YouTube-та ашу</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>Практикалық жұмыс №2</h2>
+            <p><strong>Тақырыбы:</strong> 3D модельдеу бойынша интерактивті тапсырма</p>
+
+            <h2>Мақсаты</h2>
+            <p class="intro-text">
+                3D модельдеу және SketchUp құралдары бойынша алған білімді интерактивті тапсырма арқылы бекіту.
+            </p>
+
+            <div class="learning-frame-box">
+                <iframe
+                    src="https://learningapps.org/watch?app=38470413"
+                    class="learning-frame"
+                    allowfullscreen="true"
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true">
+                </iframe>
+            </div>
+
+            <div style="text-align:center;">
+                <a class="btn" href="https://learningapps.org/watch?app=38470413" target="_blank">
+                    Тапсырманы жеке бетте ашу
+                </a>
+            </div>
+        </div>
+
+        <div class="section-card">
+            <h2>Практикалық жұмыс №3</h2>
+            <p><strong>Тақырыбы:</strong> 3D модельдеу бойынша Wordwall интерактивті тапсырмасы</p>
+
+            <h2>Мақсаты</h2>
+            <p class="intro-text">
+                3D баспа, 3D модельдеу және SketchUp құралдары бойынша білімді ойын түріндегі
+                интерактивті тапсырма арқылы бекіту.
+            </p>
+
+            <div class="wordwall-frame-box">
+                <iframe
+                    class="wordwall-frame"
+                    src="https://wordwall.net/ru/embed/175c7def55464b449a4a3777e7b264ec?themeId=1&templateId=38&fontStackId=0"
+                    frameborder="0"
+                    allowfullscreen>
+                </iframe>
+            </div>
+
+            <div style="text-align:center;">
+                <a class="btn"
+                   href="https://wordwall.net/ru/embed/175c7def55464b449a4a3777e7b264ec?themeId=1&templateId=38&fontStackId=0"
+                   target="_blank">
+                    Тапсырманы жеке бетте ашу
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="author" class="container">
+        <h1>Автор</h1>
+
+        <div class="section-card">
+            <div class="author-box">
+                <img class="author-photo" src="author.jpg" alt="Автор суреті">
+
+                <div>
+                    <h2>Электрондық оқулық авторы</h2>
+                    <p><strong>Аты-жөні:</strong> Жайлауұлы Бейбарыс</p>
+                    <p><strong>Тақырыбы:</strong> 3D Баспа</p>
+                    <p><strong>Пәні:</strong> Информатика</p>
+                    <p>
+                        Бұл электрондық оқулық 6-сынып оқушыларына 3D баспа және
+                        3D модельдеу тақырыбын түсінікті әрі интерактивті түрде меңгерту
+                        мақсатында дайындалды.
+                    </p>
+                    <p class="info-note">
+                        Автор суреті көрінуі үшін суретті HTML файл тұрған папкаға
+                        <strong>author.jpg</strong> атауымен сақта.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- AI Assistant -->
+    <button class="ai-assistant-button" onclick="toggleAIChat()">🤖</button>
+
+    <div id="aiChatBox" class="ai-chat-box">
+        <div class="ai-chat-header">
+            <span>AI Ассистент</span>
+            <button onclick="toggleAIChat()">×</button>
+        </div>
+
+        <div id="aiMessages" class="ai-chat-messages">
+            <div class="ai-message ai-bot">
+                Сәлем! Мен 3D Баспа электрондық оқулығының AI ассистентімін. Маған 3D баспа, SketchUp, теория, тест немесе практика бойынша сұрақ қой.
+            </div>
+        </div>
+
+        <div class="ai-quick-buttons">
+            <button onclick="quickAsk('3D баспа деген не?')">3D баспа</button>
+            <button onclick="quickAsk('SketchUp деген не?')">SketchUp</button>
+            <button onclick="quickAsk('Push/Pull құралы не істейді?')">Push/Pull</button>
+            <button onclick="quickAsk('Тест қалай тапсырылады?')">Тест</button>
+            <button onclick="quickAsk('Практикада не істеу керек?')">Практика</button>
+        </div>
+
+        <div class="ai-chat-input">
+            <input type="text" id="aiInput" placeholder="Сұрағыңды жаз..." onkeydown="handleAIEnter(event)">
+            <button onclick="sendAIMessage()">Жіберу</button>
+        </div>
+    </div>
+
+    <footer>
+        © 2026 | 3D Баспа | 6-сынып Информатика
+    </footer>
+
+    <script>
+        let activeUser = localStorage.getItem("active3dUser");
+
+        function showRegister() {
+            document.getElementById("loginBox").style.display = "none";
+            document.getElementById("registerBox").style.display = "block";
+            document.getElementById("authMessage").textContent = "";
+        }
+
+        function showLogin() {
+            document.getElementById("registerBox").style.display = "none";
+            document.getElementById("loginBox").style.display = "block";
+            document.getElementById("authMessage").textContent = "";
+        }
+
+        function registerUser() {
+            const username = document.getElementById("registerUsername").value.trim();
+            const password = document.getElementById("registerPassword").value.trim();
+            const password2 = document.getElementById("registerPassword2").value.trim();
+            const message = document.getElementById("authMessage");
+
+            if (username === "" || password === "" || password2 === "") {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Барлық өрісті толтыр.";
+                return;
+            }
+
+            if (password.length < 4) {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Құпиясөз кемінде 4 таңбадан тұрсын.";
+                return;
+            }
+
+            if (password !== password2) {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Құпиясөздер сәйкес келмейді.";
+                return;
+            }
+
+            const users = JSON.parse(localStorage.getItem("users3dBook")) || {};
+
+            if (users[username]) {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Бұл логин бұрын тіркелген.";
+                return;
+            }
+
+            users[username] = {
+                password: password,
+                progress: {
+                    theory: false,
+                    test: false
+                }
+            };
+
+            localStorage.setItem("users3dBook", JSON.stringify(users));
+
+            message.style.color = "#4cff88";
+            message.textContent = "Тіркелу сәтті өтті. Енді аккаунтқа кір.";
+
+            showLogin();
+            document.getElementById("loginUsername").value = username;
+        }
+
+        function loginUser() {
+            const username = document.getElementById("loginUsername").value.trim();
+            const password = document.getElementById("loginPassword").value.trim();
+            const message = document.getElementById("authMessage");
+
+            const users = JSON.parse(localStorage.getItem("users3dBook")) || {};
+
+            if (!users[username]) {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Мұндай логин табылмады.";
+                return;
+            }
+
+            if (users[username].password !== password) {
+                message.style.color = "#ff5c8d";
+                message.textContent = "Құпиясөз қате.";
+                return;
+            }
+
+            localStorage.setItem("active3dUser", username);
+            activeUser = username;
+
+            openBook();
+        }
+
+        function openBook() {
+            document.getElementById("authPage").style.display = "none";
+            document.getElementById("currentUserName").textContent = "👤 " + activeUser;
+            updateProgress();
+        }
+
+        function logoutUser() {
+            localStorage.removeItem("active3dUser");
+            activeUser = null;
+
+            document.getElementById("authPage").style.display = "flex";
+            document.getElementById("loginPassword").value = "";
+            document.getElementById("authMessage").textContent = "";
+            document.getElementById("currentUserName").textContent = "";
+        }
+
+        function getActiveUserData() {
+            const users = JSON.parse(localStorage.getItem("users3dBook")) || {};
+
+            if (!activeUser || !users[activeUser]) {
+                return null;
+            }
+
+            if (!users[activeUser].progress) {
+                users[activeUser].progress = {
+                    theory: false,
+                    test: false
+                };
+                localStorage.setItem("users3dBook", JSON.stringify(users));
+            }
+
+            return users[activeUser];
+        }
+
+        function saveActiveUserData(userData) {
+            const users = JSON.parse(localStorage.getItem("users3dBook")) || {};
+
+            if (activeUser) {
+                users[activeUser] = userData;
+                localStorage.setItem("users3dBook", JSON.stringify(users));
+            }
+        }
+
+        function markTheoryDone() {
+            const userData = getActiveUserData();
+
+            if (!userData) return;
+
+            userData.progress.theory = true;
+            saveActiveUserData(userData);
+            updateProgress();
+        }
+
+        function markTestDone() {
+            const userData = getActiveUserData();
+
+            if (!userData) return;
+
+            userData.progress.test = true;
+            saveActiveUserData(userData);
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const userData = getActiveUserData();
+
+            if (!userData) return;
+
+            const theoryDone = userData.progress.theory;
+            const testDone = userData.progress.test;
+
+            let percent = 0;
+
+            if (theoryDone) percent += 50;
+            if (testDone) percent += 50;
+
+            document.getElementById("progressFill").style.width = percent + "%";
+            document.getElementById("progressPercent").textContent = percent + "%";
+
+            document.getElementById("stepTheory").classList.toggle("done", theoryDone);
+            document.getElementById("stepTest").classList.toggle("done", testDone);
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll(".container").forEach(page => {
+                page.classList.remove("active");
+            });
+
+            document.getElementById(pageId).classList.add("active");
+
+            document.querySelectorAll(".navbar a").forEach(link => {
+                link.classList.remove("active");
+            });
+
+            const links = document.querySelectorAll(".nav-links a");
+
+            links.forEach(link => {
+                if (link.getAttribute("onclick") && link.getAttribute("onclick").includes(pageId)) {
+                    link.classList.add("active");
+                }
+            });
+
+            if (pageId === "theory21" || pageId === "theory22" || pageId === "theory23") {
+                document.querySelectorAll(".nav-links a").forEach(link => {
+                    if (link.getAttribute("onclick") && link.getAttribute("onclick").includes("theory")) {
+                        link.classList.add("active");
+                    }
+                });
+            }
+
+            if (pageId === "theory" || pageId === "theory21" || pageId === "theory22" || pageId === "theory23") {
+                markTheoryDone();
+            }
+
+            window.scrollTo(0, 0);
+        }
+
+        function loadSketchUpInside() {
+            const frame = document.getElementById("sketchupFrame");
+            frame.src = "https://app.sketchup.com/app";
+        }
+
+        const viewer = document.getElementById("viewer");
+        const modelInput = document.getElementById("modelInput");
+        const modelStatus = document.getElementById("modelStatus");
+        let currentModelUrl = null;
+
+        modelInput.addEventListener("change", function(event) {
+            const file = event.target.files[0];
+
+            if (file) {
+                const fileName = file.name.toLowerCase();
+
+                if (!fileName.endsWith(".glb")) {
+                    modelStatus.style.color = "#ff5c8d";
+                    modelStatus.textContent = "Тек .glb файл енгізуге болады.";
+                    return;
+                }
+
+                if (currentModelUrl) {
+                    URL.revokeObjectURL(currentModelUrl);
+                }
+
+                currentModelUrl = URL.createObjectURL(file);
+                viewer.src = currentModelUrl;
+
+                modelStatus.style.color = "#4cff88";
+                modelStatus.textContent = "3D модель енгізілді: " + file.name;
+            }
+        });
+
+        viewer.addEventListener("load", function() {
+            viewer.cameraOrbit = "0deg 75deg auto";
+            viewer.cameraTarget = "auto auto auto";
+            viewer.fieldOfView = "30deg";
+
+            setTimeout(function() {
+                viewer.jumpCameraToGoal();
+            }, 300);
+        });
+
+        viewer.addEventListener("error", function() {
+            modelStatus.style.color = "#ff5c8d";
+            modelStatus.textContent = "3D модель ашылмады. Файл .glb форматында болуы керек немесе модель бұзылған болуы мүмкін.";
+        });
+
+        function getRadioValue(name) {
+            const selected = document.querySelector('input[name="' + name + '"]:checked');
+            return selected ? selected.value : "";
+        }
+
+        function getMultiValues(name) {
+            return Array.from(document.querySelectorAll('input[name="' + name + '"]:checked')).map(item => item.value).sort();
+        }
+
+        function checkTest() {
+            let score = 0;
+            const total = 15;
+
+            const answers = {
+                q1: "b",
+                q2: "c",
+                q3: "a",
+                q4: "a",
+                q5: "a",
+                q6: "c",
+                q7: "a",
+                q8: "b",
+                q9: "c",
+                q10: "a",
+                q11: "true",
+                q12: "false"
+            };
+
+            Object.keys(answers).forEach(key => {
+                if (getRadioValue(key) === answers[key]) {
+                    score++;
+                }
+            });
+
+            const m1 = document.getElementById("m1").value;
+            const m2 = document.getElementById("m2").value;
+            const m3 = document.getElementById("m3").value;
+            const m4 = document.getElementById("m4").value;
+
+            if (
+                m1 === "editor" &&
+                m2 === "volume" &&
+                m3 === "format" &&
+                m4 === "printer"
+            ) {
+                score++;
+            }
+
+            const multiAnswer = getMultiValues("multi14").join(",");
+            const correctMulti = ["a", "b", "d", "f", "g"].sort().join(",");
+
+            if (multiAnswer === correctMulti) {
+                score++;
+            }
+
+            const orderItems = Array.from(document.querySelectorAll("#sortableList .sortable-item"));
+            const currentOrder = orderItems.map(item => item.dataset.order).join(",");
+
+            if (currentOrder === "1,2,3,4,5") {
+                score++;
+            }
+
+            const result = document.getElementById("result");
+            result.style.display = "block";
+
+            let percent = Math.round((score / total) * 100);
+
+            if (score >= 10) {
+                markTestDone();
+            }
+
+            if (score >= 13) {
+                result.style.color = "#4cff88";
+                result.innerHTML = "Нәтиже: " + score + "/" + total + " (" + percent + "%). Өте жақсы! Тест кезеңі орындалды.";
+            } else if (score >= 10) {
+                result.style.color = "#ffd166";
+                result.innerHTML = "Нәтиже: " + score + "/" + total + " (" + percent + "%). Жақсы! Тест кезеңі орындалды.";
+            } else if (score >= 7) {
+                result.style.color = "#ffb703";
+                result.innerHTML = "Нәтиже: " + score + "/" + total + " (" + percent + "%). Орташа. Тест кезеңі орындалуы үшін кемінде 10 балл керек.";
+            } else {
+                result.style.color = "#ff5c8d";
+                result.innerHTML = "Нәтиже: " + score + "/" + total + " (" + percent + "%). Теорияны қайта қарап, тестті қайта тапсыр.";
+            }
+        }
+
+        function resetTest() {
+            document.getElementById("testForm").reset();
+            const result = document.getElementById("result");
+            result.style.display = "none";
+            result.innerHTML = "";
+
+            const list = document.getElementById("sortableList");
+            const defaultOrder = [
+                { text: "Push/Pull құралымен көлем беру", order: "3" },
+                { text: "SketchUp бағдарламасын іске қосу", order: "1" },
+                { text: "Жұмысты сақтау", order: "5" },
+                { text: "Тіктөртбұрыш салу", order: "2" },
+                { text: "Модельге түс немесе материал беру", order: "4" }
+            ];
+
+            list.innerHTML = "";
+
+            defaultOrder.forEach(item => {
+                const li = document.createElement("li");
+                li.className = "sortable-item";
+                li.draggable = true;
+                li.dataset.order = item.order;
+                li.textContent = item.text;
+                list.appendChild(li);
+            });
+
+            initSortable();
+        }
+
+        function initSortable() {
+            const sortableList = document.getElementById("sortableList");
+
+            if (!sortableList) return;
+
+            const items = sortableList.querySelectorAll(".sortable-item");
+
+            items.forEach(item => {
+                item.addEventListener("dragstart", () => {
+                    item.classList.add("dragging");
+                });
+
+                item.addEventListener("dragend", () => {
+                    item.classList.remove("dragging");
+                });
+            });
+
+            sortableList.addEventListener("dragover", event => {
+                event.preventDefault();
+
+                const draggingItem = sortableList.querySelector(".dragging");
+                const afterElement = getDragAfterElement(sortableList, event.clientY);
+
+                if (!draggingItem) return;
+
+                if (afterElement == null) {
+                    sortableList.appendChild(draggingItem);
+                } else {
+                    sortableList.insertBefore(draggingItem, afterElement);
+                }
+            });
+        }
+
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll(".sortable-item:not(.dragging)")];
+
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+
+                if (offset < 0 && offset > closest.offset) {
+                    return {
+                        offset: offset,
+                        element: child
+                    };
+                } else {
+                    return closest;
+                }
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+
+        window.addEventListener("DOMContentLoaded", function() {
+            activeUser = localStorage.getItem("active3dUser");
+
+            if (activeUser) {
+                openBook();
+            } else {
+                document.getElementById("authPage").style.display = "flex";
+            }
+
+            initSortable();
+        });
+
+
+        /* ===== HTML ішіндегі AI Assistant (API кілтсіз, серверсіз) ===== */
+        function toggleAIChat() {
+            const chatBox = document.getElementById("aiChatBox");
+            chatBox.style.display = chatBox.style.display === "flex" ? "none" : "flex";
+        }
+
+        function handleAIEnter(event) {
+            if (event.key === "Enter") sendAIMessage();
+        }
+
+        function addAIMessage(text, type) {
+            const messages = document.getElementById("aiMessages");
+            const messageDiv = document.createElement("div");
+            messageDiv.className = "ai-message " + type;
+            messageDiv.textContent = text;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            return messageDiv;
+        }
+
+        function quickAsk(question) {
+            document.getElementById("aiInput").value = question;
+            sendAIMessage();
+        }
+
+        function sendAIMessage() {
+            const input = document.getElementById("aiInput");
+            const question = input.value.trim();
+            if (question === "") return;
+
+            addAIMessage(question, "ai-user");
+            input.value = "";
+
+            const loadingMessage = addAIMessage("Ойланып жатырмын...", "ai-bot");
+
+            setTimeout(function() {
+                loadingMessage.textContent = getLocalAIAnswer(question);
+            }, 350);
+        }
+
+        function getLocalAIAnswer(question) {
+            const q = question.toLowerCase();
+
+            if (q.includes("сәлем") || q.includes("привет") || q.includes("hello")) {
+                return "Сәлем! Мен осы 3D Баспа электрондық оқулығының көмекші ассистентімін. Маған 3D баспа, SketchUp, теория, тест немесе практика бойынша сұрақ қой.";
+            }
+
+            if (q.includes("3d баспа") || q.includes("3д баспа") || q.includes("3d printing") || q.includes("баспа деген")) {
+                return "3D баспа — компьютерде дайындалған үшөлшемді модельді 3D принтер арқылы нақты затқа айналдыру технологиясы. Принтер материалды қабат-қабат шығарып, модельдің пішінін құрастырады.";
+            }
+
+            if (q.includes("3d модель") || q.includes("3д модель") || q.includes("модельдеу") || q.includes("модель деген")) {
+                return "3D модель — ені, биіктігі және тереңдігі бар көлемді объектінің компьютерлік үлгісі. 3D модельдеу кезінде объектіні салуға, бұруға, жылжытуға, бояуға және өлшемін өзгертуге болады.";
+            }
+
+            if (q.includes("sketchup") || q.includes("скетчап") || q.includes("скечап")) {
+                return "SketchUp — үшөлшемді модельдер құруға арналған 3D редактор. 6-сыныпта 3D модельдеу тақырыбын үйрену үшін қолданылады. Онда Line, Rectangle, Circle, Push/Pull, Move, Scale сияқты құралдар бар.";
+            }
+
+            if (q.includes("push") || q.includes("pull") || q.includes("тарту") || q.includes("итер")) {
+                return "Push/Pull құралы SketchUp-та жазық фигураға көлем береді. Мысалы, тіктөртбұрыш салып, Push/Pull қолдансаң, оны қорап немесе ғимарат пішініне айналдыруға болады.";
+            }
+
+            if (q.includes("line") || q.includes("сызық")) {
+                return "Line құралы түзу сызық салуға арналған. SketchUp-та сызықтар арқылы объектінің қырларын немесе бастапқы пішінін құруға болады.";
+            }
+
+            if (q.includes("rectangle") || q.includes("тіктөртбұрыш") || q.includes("төртбұрыш")) {
+                return "Rectangle құралы жазықтықта тіктөртбұрыш салу үшін қолданылады. Кейін оны Push/Pull арқылы көлемді модельге айналдыруға болады.";
+            }
+
+            if (q.includes("circle") || q.includes("шеңбер") || q.includes("цилиндр")) {
+                return "Circle құралы шеңбер салуға арналған. Цилиндр жасау үшін алдымен шеңбер салынады, кейін Push/Pull құралымен жоғары қарай созылады.";
+            }
+
+            if (q.includes("scale") || q.includes("масштаб")) {
+                return "Scale құралы объектінің өлшемін өзгертуге арналған. Ол модельді үлкейтуге немесе кішірейтуге мүмкіндік береді.";
+            }
+
+            if (q.includes("move") || q.includes("жылжыту")) {
+                return "Move құралы объектіні бір орыннан екінші орынға ауыстыру үшін қолданылады. Сонымен қатар объектінің жеке бөлігін де жылжытуға болады.";
+            }
+
+            if (q.includes("тест")) {
+                return "Тест бөлімінде 15 тапсырма бар. Тест кезеңі орындалды деп есептелуі үшін кемінде 10 балл жинау керек. 10 баллдан жоғары алсаң, оқу прогресі 100% болады.";
+            }
+
+            if (q.includes("прогрес") || q.includes("progress")) {
+                return "Оқу прогресі 2 кезеңнен тұрады: теорияны өту — 50%, тест тапсыру — 50%. Теория бетіне кірсең прогресс 50% болады, тесттен кемінде 10 балл алсаң 100% болады.";
+            }
+
+            if (q.includes("практика") || q.includes("практикалық")) {
+                return "Практика бөлімінде SketchUp бағдарламасында қарапайым 3D модель құру, LearningApps тапсырмасы және Wordwall интерактивті тапсырмасы бар. Бірінші практикада SketchUp-та модель жасауды үйренесің.";
+            }
+
+            if (q.includes("stl")) {
+                return "STL — 3D модельді 3D баспаға дайындауда жиі қолданылатын файл форматы. Ол модельдің сыртқы пішінін сақтауға көмектеседі.";
+            }
+
+            if (q.includes("конус")) {
+                return "Конус жасау үшін SketchUp-та шеңбер негіз ретінде алынады, кейін оның үстіңгі бөлігі кішірейтіліп, көлемді пішін жасалады.";
+            }
+
+            if (q.includes("сфера") || q.includes("шар")) {
+                return "Сфера — шар тәрізді 3D объект. SketchUp-та оны жасау үшін шеңбер, доға және айналдыру әрекеттері қолданылады.";
+            }
+
+            if (q.includes("автор")) {
+                return "Электрондық оқулық авторы — Жайлауұлы Бейбарыс. Оқулық 6-сынып Информатика пәніндегі 3D Баспа тақырыбына арналған.";
+            }
+
+            if (q.includes("қалай") && q.includes("модель")) {
+                return "Қарапайым 3D модель жасау реті: SketchUp ашу, жаңа жоба бастау, Rectangle немесе Circle құралымен пішін салу, Push/Pull арқылы көлем беру, түс немесе материал қосу, жұмысты сақтау.";
+            }
+
+            return "Бұл сұрақ бойынша нақты жауап таба алмадым. Маған 3D баспа, SketchUp, 3D модельдеу, құралдар, тест немесе практика туралы сұрақ қойып көр.";
+        }
+
+    </script>
+
+</body>
+</html>
